@@ -722,19 +722,19 @@ console.log("\n\n\n");
   }
   strStatsFromCombies = strStatsFromCombies + "\n[ 최다 승리 조합 ]\n"
   for(let i = 0; i < MOST_NUM; i++ ) {
-    strStatsFromCombies = strStatsFromCombies +"[ "+COMBINATIONS_OF_PLAYER[pointCombi.mostWinCombi[i]].toString()+" ] - WINS: "+statsFromCombi[pointCombi.mostWinCombi[i]].wins+"\n";
+    strStatsFromCombies = strStatsFromCombies +"[ "+COMBINATIONS_OF_PLAYER[pointCombi.mostWinCombi[i]].toString()+" ] - WINS: "+statsFromCombi[pointCombi.mostWinCombi[i]].wins+"("+new Number(statsFromCombi[pointCombi.mostWinCombi[i]].wins+statsFromCombi[pointCombi.mostWinCombi[i]].loses)+"전)\n";
   }
   strStatsFromCombies = strStatsFromCombies + "\n[ 최고 승률 조합 ]\n"
   for(let i = 0; i < MOST_NUM; i++ ) {
-    strStatsFromCombies = strStatsFromCombies +"[ "+COMBINATIONS_OF_PLAYER[pointCombi.mostWinRateCombi[i]].toString()+" ] - WIN_RATES: "+(statsFromCombi[pointCombi.mostWinRateCombi[i]].wins/(statsFromCombi[pointCombi.mostWinRateCombi[i]].wins+statsFromCombi[pointCombi.mostWinRateCombi[i]].loses)*100).toFixed(2)+"%\n";
+    strStatsFromCombies = strStatsFromCombies +"[ "+COMBINATIONS_OF_PLAYER[pointCombi.mostWinRateCombi[i]].toString()+" ] - WIN_RATES: "+(statsFromCombi[pointCombi.mostWinRateCombi[i]].wins/(statsFromCombi[pointCombi.mostWinRateCombi[i]].wins+statsFromCombi[pointCombi.mostWinRateCombi[i]].loses)*100).toFixed(2)+"%("+new Number(statsFromCombi[pointCombi.mostWinRateCombi[i]].wins+statsFromCombi[pointCombi.mostWinRateCombi[i]].loses)+"전)\n";
   }
   strStatsFromCombies = strStatsFromCombies + "\n[ 최다 패배 조합 ]\n"
   for(let i = 0; i < MOST_NUM; i++ ) {
-    strStatsFromCombies = strStatsFromCombies +"[ "+COMBINATIONS_OF_PLAYER[pointCombi.mostLoseCombi[i]].toString()+" ] - LOSES: "+statsFromCombi[pointCombi.mostLoseCombi[i]].loses+"\n";
+    strStatsFromCombies = strStatsFromCombies +"[ "+COMBINATIONS_OF_PLAYER[pointCombi.mostLoseCombi[i]].toString()+" ] - LOSES: "+statsFromCombi[pointCombi.mostLoseCombi[i]].loses+"("+new Number(statsFromCombi[pointCombi.mostLoseCombi[i]].wins+statsFromCombi[pointCombi.mostLoseCombi[i]].loses)+"전)\n";
   }
   strStatsFromCombies = strStatsFromCombies + "\n[ 최저 승률 조합 ]\n"
   for(let i = 0; i < MOST_NUM; i++ ) {
-    strStatsFromCombies = strStatsFromCombies +"[ "+COMBINATIONS_OF_PLAYER[pointCombi.mostLoseRateCombi[i]].toString()+" ] - WIN_RATES: "+(statsFromCombi[pointCombi.mostLoseRateCombi[i]].wins/(statsFromCombi[pointCombi.mostLoseRateCombi[i]].wins+statsFromCombi[pointCombi.mostLoseRateCombi[i]].loses)*100).toFixed(2)+"%\n";
+    strStatsFromCombies = strStatsFromCombies +"[ "+COMBINATIONS_OF_PLAYER[pointCombi.mostLoseRateCombi[i]].toString()+" ] - WIN_RATES: "+(statsFromCombi[pointCombi.mostLoseRateCombi[i]].wins/(statsFromCombi[pointCombi.mostLoseRateCombi[i]].wins+statsFromCombi[pointCombi.mostLoseRateCombi[i]].loses)*100).toFixed(2)+"%("+new Number(statsFromCombi[pointCombi.mostLoseRateCombi[i]].wins+statsFromCombi[pointCombi.mostLoseRateCombi[i]].loses)+"전)\n";
   }
   
   console.log(strStatsFromCombies);
@@ -765,8 +765,6 @@ console.log("\n\n\n");
 
 
 
-
-
 // ///////////////////
 // 같은 편일 때 승률 
 // 상대 편일 때 승률 
@@ -791,6 +789,3 @@ console.log("\n\n\n");
 
 
 // 포지션 알고리즘?
-
-
-
