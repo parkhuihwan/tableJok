@@ -1,5 +1,6 @@
 var fs = require('fs');
-fs.readFile('./recordJok.txt', 'utf8', function(err, totalRecord){
+fs.readFile('./recordJok.txt', 'utf8', function (err, totalRecord) {
+//fs.readFile('./recordJok23-2.txt', 'utf8', function (err, totalRecord) {
   //console.log(totalRecord);
 
   const WIN = 1;
@@ -7,11 +8,11 @@ fs.readFile('./recordJok.txt', 'utf8', function(err, totalRecord){
   const LOSE = 2;
   const NOSHOW = 0;
 
-  const PLAYER_NUM=7;
-  const PLAYER_INDEX = ["커두", "푸름", "바키", "서재", "강산", "영쿠", "빵길", "오범", "준형", "손민", "민우", "홍", "한", "고", "진호", "승훈", "박준", "태"];   
-  const INDEX_FROM_PLAYER = {"커두":0, "푸름":1, "바키":2, "서재":3, "강산":4, "영쿠":5, "빵길":6, "오범":7, "준형":8, "손민":9, "민우":10, "홍":11, "한":12, "고":13, "진호":14, "승훈":15, "박준":16, "태":17};
+  const PLAYER_NUM = 8;
+  const PLAYER_INDEX = ["커두", "푸름", "바키", "서재", "강산", "영쿠", "빵길", "이다", "오범"];
+  const INDEX_FROM_PLAYER = { "커두": 0, "푸름": 1, "바키": 2, "서재": 3, "강산": 4, "영쿠": 5, "빵길": 6, "이다": 7,"오범": 8};
 
-  const MOST_NUM=5;
+  const MOST_NUM = 5;
   const COMBINATIONS_OF_PLAYER = [
     ["푸름", "바키", "커두"],
     ["푸름", "바키", "서재"],
@@ -210,12 +211,12 @@ fs.readFile('./recordJok.txt', 'utf8', function(err, totalRecord){
   //커두 홍 서재 강산/바키 영쿠 태 푸름
 
   let eachDayStr = [];
-  for(let i = 0; i < recordArray.length; i++) {
+  for (let i = 0; i < recordArray.length; i++) {
     eachDayStr[i] = recordArray[i].split('\r\n');
   }
-  
+
   let eachDayObj = [];
-  for(let day = 0; day < eachDayStr.length; day++) {
+  for (let day = 0; day < eachDayStr.length; day++) {
 
     eachDayObj[day] = {
       str: eachDayStr[day][0],
@@ -225,11 +226,11 @@ fs.readFile('./recordJok.txt', 'utf8', function(err, totalRecord){
     };
     eachDayObj[day].total = eachDayStr[day][0].split(' ')[0].split(':')[1];
 
-    for(let i = 1; i < eachDayStr[day][0].split(' ').length; i++) {
+    for (let i = 1; i < eachDayStr[day][0].split(' ').length; i++) {
       eachDayObj[day].members[INDEX_FROM_PLAYER[eachDayStr[day][0].split(' ')[i].split(':')[0]]] = PLAY;
     }
 
-    for(let matchIndex = 1; matchIndex < eachDayStr[day].length; matchIndex++) {
+    for (let matchIndex = 1; matchIndex < eachDayStr[day].length; matchIndex++) {
       //console.log(matchIndex);
       let match = {
         win: eachDayStr[day][matchIndex].split('/')[1].split(' '),
@@ -254,23 +255,27 @@ fs.readFile('./recordJok.txt', 'utf8', function(err, totalRecord){
           "승훈": NOSHOW,
           "박준": NOSHOW,
           "태": NOSHOW,
+          "이다": NOSHOW,
         },
       }
-      for(let i = 0; i < match.winNum; i++)
+      for (let i = 0; i < match.winNum; i++)
         match.members[match.win[i]] = WIN;
-        
-      for(let i = 0; i < match.loseNum; i++)
-        match.members[match.lose[i]] = LOSE; 
+
+      for (let i = 0; i < match.loseNum; i++)
+        match.members[match.lose[i]] = LOSE;
 
       eachDayObj[day].match.push(match);
     }
   }
 
-console.log("\n\n\n");
-  let players = {
-    '바키':{
-      dayTotal:0,
-      matchTotal:0,
+  console.log("\n\n\n");
+
+  // 플레이어 초기화
+  let players = {};
+  for (let i = 0; i < PLAYER_INDEX.length; i++) {
+    players[PLAYER_INDEX[i]] = {
+      dayTotal: 0,
+      matchTotal: 0,
 
       sameSideTotal: new Array(PLAYER_NUM).fill(0),
       sameSideWin: new Array(PLAYER_NUM).fill(0),
@@ -299,284 +304,38 @@ console.log("\n\n\n");
 
       elo: [],
       curElo: 1000,
-    },
-    '강산':{
-      dayTotal:0,
-      matchTotal:0,
+    }
+  }
 
-      sameSideTotal: new Array(PLAYER_NUM).fill(0),
-      sameSideWin: new Array(PLAYER_NUM).fill(0),
-      otherSideTotal: new Array(PLAYER_NUM).fill(0),
-      otherSideWin: new Array(PLAYER_NUM).fill(0),
+  // ELO 현행화
+  players['커두'].curElo = 1129;
+  players['푸름'].curElo = 1240;
+  players['바키'].curElo = 1078;
+  players['서재'].curElo = 1131;
+  players['강산'].curElo = 1096;
+  players['영쿠'].curElo = 1066;
+  players['빵길'].curElo = 1089;
 
-      threeToThreeTotal: 0,
-      threeToThreeWin: 0,
-      threeToFourTotal: 0,
-      threeToFourWin: 0,
-      fourToThreeTotal: 0,
-      fourToThreeWin: 0,
-      fourToFourTotal: 0,
-      fourToFourWin: 0,
 
-      firstWin: 0,
-      lastWin: 0,
+  for (let k = 0; k < PLAYER_NUM; k++) {
+    let pi = k;
+    let p = PLAYER_INDEX[k];
 
-      afterWinTotal: 0,
-      afterWinWin: 0,
-      afterLoseTotal: 0,
-      afterLoseWin: 0,
-
-      conWin: 0,
-      conLose: 0,
-
-      elo: [],
-      curElo: 1000,
-    },
-    '빵길':{
-      dayTotal:0,
-      matchTotal:0,
-
-      sameSideTotal: new Array(PLAYER_NUM).fill(0),
-      sameSideWin: new Array(PLAYER_NUM).fill(0),
-      otherSideTotal: new Array(PLAYER_NUM).fill(0),
-      otherSideWin: new Array(PLAYER_NUM).fill(0),
-
-      threeToThreeTotal: 0,
-      threeToThreeWin: 0,
-      threeToFourTotal: 0,
-      threeToFourWin: 0,
-      fourToThreeTotal: 0,
-      fourToThreeWin: 0,
-      fourToFourTotal: 0,
-      fourToFourWin: 0,
-
-      firstWin: 0,
-      lastWin: 0,
-
-      afterWinTotal: 0,
-      afterWinWin: 0,
-      afterLoseTotal: 0,
-      afterLoseWin: 0,
-
-      conWin: 0,
-      conLose: 0,
-
-      elo: [],
-      curElo: 1000,
-    },
-    '커두':{
-      dayTotal:0,
-      matchTotal:0,
-
-      sameSideTotal: new Array(PLAYER_NUM).fill(0),
-      sameSideWin: new Array(PLAYER_NUM).fill(0),
-      otherSideTotal: new Array(PLAYER_NUM).fill(0),
-      otherSideWin: new Array(PLAYER_NUM).fill(0),
-
-      threeToThreeTotal: 0,
-      threeToThreeWin: 0,
-      threeToFourTotal: 0,
-      threeToFourWin: 0,
-      fourToThreeTotal: 0,
-      fourToThreeWin: 0,
-      fourToFourTotal: 0,
-      fourToFourWin: 0,
-
-      firstWin: 0,
-      lastWin: 0,
-
-      afterWinTotal: 0,
-      afterWinWin: 0,
-      afterLoseTotal: 0,
-      afterLoseWin: 0,
-
-      conWin: 0,
-      conLose: 0,
-
-      elo: [],
-      curElo: 1000,
-    },
-    '영쿠':{
-      dayTotal:0,
-      matchTotal:0,
-
-      sameSideTotal: new Array(PLAYER_NUM).fill(0),
-      sameSideWin: new Array(PLAYER_NUM).fill(0),
-      otherSideTotal: new Array(PLAYER_NUM).fill(0),
-      otherSideWin: new Array(PLAYER_NUM).fill(0),
-
-      threeToThreeTotal: 0,
-      threeToThreeWin: 0,
-      threeToFourTotal: 0,
-      threeToFourWin: 0,
-      fourToThreeTotal: 0,
-      fourToThreeWin: 0,
-      fourToFourTotal: 0,
-      fourToFourWin: 0,
-
-      firstWin: 0,
-      lastWin: 0,
-
-      afterWinTotal: 0,
-      afterWinWin: 0,
-      afterLoseTotal: 0,
-      afterLoseWin: 0,
-
-      conWin: 0,
-      conLose: 0,
-
-      elo: [],
-      curElo: 1000,
-    },
-    '서재':{
-      dayTotal:0,
-      matchTotal:0,
-
-      sameSideTotal: new Array(PLAYER_NUM).fill(0),
-      sameSideWin: new Array(PLAYER_NUM).fill(0),
-      otherSideTotal: new Array(PLAYER_NUM).fill(0),
-      otherSideWin: new Array(PLAYER_NUM).fill(0),
-
-      threeToThreeTotal: 0,
-      threeToThreeWin: 0,
-      threeToFourTotal: 0,
-      threeToFourWin: 0,
-      fourToThreeTotal: 0,
-      fourToThreeWin: 0,
-      fourToFourTotal: 0,
-      fourToFourWin: 0,
-
-      firstWin: 0,
-      lastWin: 0,
-
-      afterWinTotal: 0,
-      afterWinWin: 0,
-      afterLoseTotal: 0,
-      afterLoseWin: 0,
-
-      conWin: 0,
-      conLose: 0,
-
-      elo: [],
-      curElo: 1000,
-    },
-    '푸름':{
-      dayTotal:0,
-      matchTotal:0,
-
-      sameSideTotal: new Array(PLAYER_NUM).fill(0),
-      sameSideWin: new Array(PLAYER_NUM).fill(0),
-      otherSideTotal: new Array(PLAYER_NUM).fill(0),
-      otherSideWin: new Array(PLAYER_NUM).fill(0),
-
-      threeToThreeTotal: 0,
-      threeToThreeWin: 0,
-      threeToFourTotal: 0,
-      threeToFourWin: 0,
-      fourToThreeTotal: 0,
-      fourToThreeWin: 0,
-      fourToFourTotal: 0,
-      fourToFourWin: 0,
-
-      firstWin: 0,
-      lastWin: 0,
-
-      afterWinTotal: 0,
-      afterWinWin: 0,
-      afterLoseTotal: 0,
-      afterLoseWin: 0,
-
-      conWin: 0,
-      conLose: 0,
-
-      elo: [],
-      curElo: 1000,
-    },
-    '태':{
-      dayTotal:0,
-      matchTotal:0,
-
-      sameSideTotal: new Array(PLAYER_NUM).fill(0),
-      sameSideWin: new Array(PLAYER_NUM).fill(0),
-      otherSideTotal: new Array(PLAYER_NUM).fill(0),
-      otherSideWin: new Array(PLAYER_NUM).fill(0),
-
-      threeToThreeTotal: 0,
-      threeToThreeWin: 0,
-      threeToFourTotal: 0,
-      threeToFourWin: 0,
-      fourToThreeTotal: 0,
-      fourToThreeWin: 0,
-      fourToFourTotal: 0,
-      fourToFourWin: 0,
-
-      firstWin: 0,
-      lastWin: 0,
-
-      afterWinTotal: 0,
-      afterWinWin: 0,
-      afterLoseTotal: 0,
-      afterLoseWin: 0,
-
-      conWin: 0,
-      conLose: 0,
-
-      elo: [],
-      curElo: 1000,
-    },
-    '오범':{
-      dayTotal:0,
-      matchTotal:0,
-
-      sameSideTotal: new Array(PLAYER_NUM).fill(0),
-      sameSideWin: new Array(PLAYER_NUM).fill(0),
-      otherSideTotal: new Array(PLAYER_NUM).fill(0),
-      otherSideWin: new Array(PLAYER_NUM).fill(0),
-
-      threeToThreeTotal: 0,
-      threeToThreeWin: 0,
-      threeToFourTotal: 0,
-      threeToFourWin: 0,
-      fourToThreeTotal: 0,
-      fourToThreeWin: 0,
-      fourToFourTotal: 0,
-      fourToFourWin: 0,
-
-      firstWin: 0,
-      lastWin: 0,
-
-      afterWinTotal: 0,
-      afterWinWin: 0,
-      afterLoseTotal: 0,
-      afterLoseWin: 0,
-
-      conWin: 0,
-      conLose: 0,
-
-      elo: [],
-      curElo: 1000,
-    },
-  };
-
-  for(let k = 0; k < PLAYER_NUM; k++) {
-  let pi = k;
-  let p = PLAYER_INDEX[k];
-
-    for(let day = 0; day < eachDayObj.length; day++){
+    for (let day = 0; day < eachDayObj.length; day++) {
       players[p].elo[day] = [];
-      if(!eachDayObj[day].members[pi]) continue; // 불참이면
+      if (!eachDayObj[day].members[pi]) continue; // 불참이면
       players[p].dayTotal++;
 
       let currentConWin = 0;
       let currentConLose = 0;
 
-      for(let matchIndex = 0, match; matchIndex < eachDayObj[day].match.length; matchIndex++) {
+      for (let matchIndex = 0, match; matchIndex < eachDayObj[day].match.length; matchIndex++) {
         match = eachDayObj[day].match[matchIndex];
-        if(!match.members[p]) continue;// 불참이면 
+        if (!match.members[p]) continue;// 불참이면 
         players[p].matchTotal++;
 
         const win = WIN === match.members[p];
-        if(match.members[p] === WIN){ // 연승 기록
+        if (match.members[p] === WIN) { // 연승 기록
           currentConWin++;
           currentConLose = 0;
           currentConWin > players[p].conWin ? players[p].conWin = currentConWin : currentConWin = currentConWin;
@@ -586,38 +345,38 @@ console.log("\n\n\n");
           currentConLose > players[p].conLose ? players[p].conLose = currentConLose : currentConLose = currentConLose;
         }
 
-        if(matchIndex === 0 && win) { // 첫 판
+        if (matchIndex === 0 && win) { // 첫 판
           players[p].firstWin++;
-        } else if(matchIndex === eachDayObj[day].match.length-1 && match.members[p] === WIN) { // 막판
+        } else if (matchIndex === eachDayObj[day].match.length - 1 && match.members[p] === WIN) { // 막판
           players[p].lastWin++;
         }
 
         // 플레이어 수 별 승률 계산
-        if(match.winNum === 3 && match.loseNum === 3) { // 33일 때
+        if (match.winNum === 3 && match.loseNum === 3) { // 33일 때
           players[p].threeToThreeTotal++;
-          if(win) players[p].threeToThreeWin++;
-        } else if(match.winNum === 4 && match.loseNum === 3) { // 43일 때
-          if(win) { players[p].fourToThreeTotal++; players[p].fourToThreeWin++; }
+          if (win) players[p].threeToThreeWin++;
+        } else if (match.winNum === 4 && match.loseNum === 3) { // 43일 때
+          if (win) { players[p].fourToThreeTotal++; players[p].fourToThreeWin++; }
           else { players[p].threeToFourTotal++; }
-        } else if(match.winNum === 3 && match.loseNum === 4) { // 34일 때
-          if(win) { players[p].threeToFourTotal++; players[p].threeToFourWin++; }
+        } else if (match.winNum === 3 && match.loseNum === 4) { // 34일 때
+          if (win) { players[p].threeToFourTotal++; players[p].threeToFourWin++; }
           else { players[p].fourToThreeTotal++; }
-        } else if(match.winNum === 4 && match.loseNum === 4) { // 44일 때
+        } else if (match.winNum === 4 && match.loseNum === 4) { // 44일 때
           players[p].fourToFourTotal++;
-          if(win) players[p].fourToFourWin++;
+          if (win) players[p].fourToFourWin++;
         }
 
         // 아군/적군일 경우 별 승률 계산
-        for(let ssIndex = 0; ssIndex < PLAYER_NUM; ssIndex++) {
-          if(ssIndex === pi) continue;
-          if(match.members[PLAYER_INDEX[ssIndex]] === NOSHOW) continue;
+        for (let ssIndex = 0; ssIndex < PLAYER_NUM; ssIndex++) {
+          if (ssIndex === pi) continue;
+          if (match.members[PLAYER_INDEX[ssIndex]] === NOSHOW) continue;
 
-          if(win) {
-            if(match.win.includes(PLAYER_INDEX[ssIndex])) { players[p].sameSideTotal[ssIndex]++; players[p].sameSideWin[ssIndex]++; }
-            else if(match.lose.includes(PLAYER_INDEX[ssIndex])) { players[p].otherSideTotal[ssIndex]++; players[p].otherSideWin[ssIndex]++; }
+          if (win) {
+            if (match.win.includes(PLAYER_INDEX[ssIndex])) { players[p].sameSideTotal[ssIndex]++; players[p].sameSideWin[ssIndex]++; }
+            else if (match.lose.includes(PLAYER_INDEX[ssIndex])) { players[p].otherSideTotal[ssIndex]++; players[p].otherSideWin[ssIndex]++; }
           } else {
-            if(match.win.includes(PLAYER_INDEX[ssIndex])) { players[p].otherSideTotal[ssIndex]++; }
-            else if(match.lose.includes(PLAYER_INDEX[ssIndex])) { players[p].sameSideTotal[ssIndex]++; }
+            if (match.win.includes(PLAYER_INDEX[ssIndex])) { players[p].otherSideTotal[ssIndex]++; }
+            else if (match.lose.includes(PLAYER_INDEX[ssIndex])) { players[p].sameSideTotal[ssIndex]++; }
           }
         }
       }
@@ -625,20 +384,20 @@ console.log("\n\n\n");
   }
 
   // ELO Rating
-  for(let day = 0; day < eachDayObj.length; day++){
+  for (let day = 0; day < eachDayObj.length; day++) {
 
-    for(let matchIndex = 0, match; matchIndex < eachDayObj[day].match.length; matchIndex++) {
+    for (let matchIndex = 0, match; matchIndex < eachDayObj[day].match.length; matchIndex++) {
 
       match = eachDayObj[day].match[matchIndex];
       let winElo = 0;
       let loseElo = 0;
 
-      for(let i = 0; i < match.winNum; i++)
+      for (let i = 0; i < match.winNum; i++)
         winElo += players[match.win[i]].curElo;
       winElo = Math.ceil(winElo / match.winNum); // 이긴 팀의 ELO 평균 점수
       //winElo = winElo / match.winNum; // 이긴 팀의 ELO 평균 점수
 
-      for(let i = 0; i < match.loseNum; i++) 
+      for (let i = 0; i < match.loseNum; i++)
         loseElo += players[match.lose[i]].curElo;
       loseElo = Math.ceil(loseElo / match.loseNum); // 진 팀의 ELO 평균 점수
       //loseElo = loseElo / match.loseNum; // 진 팀의 ELO 평균 점수
@@ -665,98 +424,98 @@ console.log("\n\n\n");
 
   let str = "";
   for (let k = 0; k < PLAYER_NUM; k++) {
-    str = str+PLAYER_INDEX[k]+",";
+    str = str + PLAYER_INDEX[k] + ",";
     for (let day = 0; day < eachDayObj.length; day++) {
-      for (let matchIndex = eachDayObj[day].match.length-1, match; matchIndex < eachDayObj[day].match.length; matchIndex++) {
-        str = str+players[PLAYER_INDEX[k]].elo[day][matchIndex]+",";
+      for (let matchIndex = eachDayObj[day].match.length - 1, match; matchIndex < eachDayObj[day].match.length; matchIndex++) {
+        str = str + players[PLAYER_INDEX[k]].elo[day][matchIndex] + ",";
         //str = str+players[PLAYER_INDEX[k]].elo[day][matchIndex]+",";
       }
     }
-    str = str+"\n";
+    str = str + "\n";
   }
-  fs.writeFile('./elo.csv', str, 'utf-8', function(err, totalRecord){
+  fs.writeFile('./elo.csv', str, 'utf-8', function (err, totalRecord) {
   });
 
   const calMatchFromCombi = (win, lose) => {
     for (let i = 0; i < COMBINATIONS_OF_PLAYER.length; i++) {
-      if( COMBINATIONS_OF_PLAYER[i].filter(x => win.includes(x)).length === 3 ) statsFromCombi[i].wins++;
-      if( COMBINATIONS_OF_PLAYER[i].filter(x => lose.includes(x)).length === 3 ) statsFromCombi[i].loses++;
+      if (COMBINATIONS_OF_PLAYER[i].filter(x => win.includes(x)).length === 3) statsFromCombi[i].wins++;
+      if (COMBINATIONS_OF_PLAYER[i].filter(x => lose.includes(x)).length === 3) statsFromCombi[i].loses++;
     }
   };
-  
+
   // Combination Statistics
-  for(let day = 0; day < eachDayObj.length; day++){
-    for(let matchIndex = 0, match; matchIndex < eachDayObj[day].match.length; matchIndex++) {
+  for (let day = 0; day < eachDayObj.length; day++) {
+    for (let matchIndex = 0, match; matchIndex < eachDayObj[day].match.length; matchIndex++) {
       match = eachDayObj[day].match[matchIndex]
       calMatchFromCombi(match.win, match.lose);
     }
   }
 
   // 최다승 최다패 최고승률 최저승률 조합 탐색
-  for(let i = 0; i < COMBINATIONS_OF_PLAYER.length; i++) {
+  for (let i = 0; i < COMBINATIONS_OF_PLAYER.length; i++) {
     statsFromCombi[i].index = i;
   }
   statsFromCombi.sort((x, y) => y.wins - x.wins);
-  for (let i = 0; i < MOST_NUM; i++ ){
+  for (let i = 0; i < MOST_NUM; i++) {
     pointCombi.mostWinCombi[i] = statsFromCombi[i].index;
-  }  
+  }
   statsFromCombi.sort((x, y) => y.loses - x.loses);
-  for (let i = 0; i < MOST_NUM; i++ ){
+  for (let i = 0; i < MOST_NUM; i++) {
     pointCombi.mostLoseCombi[i] = statsFromCombi[i].index;
-  }  
-  statsFromCombi.sort((x, y) => y.wins/(y.wins+y.loses)*100 - x.wins/(x.wins+x.loses)*100);
-  for (let i = 0; i < MOST_NUM; i++ ){
+  }
+  statsFromCombi.sort((x, y) => y.wins / (y.wins + y.loses) * 100 - x.wins / (x.wins + x.loses) * 100);
+  for (let i = 0; i < MOST_NUM; i++) {
     pointCombi.mostWinRateCombi[i] = statsFromCombi[i].index;
-  }  
-  statsFromCombi.sort((x, y) => y.loses/(y.wins+y.loses)*100 - x.loses/(x.wins+x.loses)*100);
-  for (let i = 0; i < MOST_NUM; i++ ){
+  }
+  statsFromCombi.sort((x, y) => y.loses / (y.wins + y.loses) * 100 - x.loses / (x.wins + x.loses) * 100);
+  for (let i = 0; i < MOST_NUM; i++) {
     pointCombi.mostLoseRateCombi[i] = statsFromCombi[i].index;
   }
   statsFromCombi.sort((x, y) => x.index - y.index);
-  
+
   console.log("[ 조합 별 승률 ]");
   let strStatsFromCombies = "";
-  for(let i = 0; i < COMBINATIONS_OF_PLAYER.length; i++)  {
+  for (let i = 0; i < COMBINATIONS_OF_PLAYER.length; i++) {
     //if(i%15 === 0) strStatsFromCombies = strStatsFromCombies +"\n";
-    strStatsFromCombies = strStatsFromCombies + "[ "+COMBINATIONS_OF_PLAYER[i].toString()+" ] - WINS: "+statsFromCombi[i].wins+" / LOSES: "+statsFromCombi[i].loses+" / RATE: "+(statsFromCombi[i].wins/(statsFromCombi[i].loses+statsFromCombi[i].wins)*100).toFixed(2)+"%\n";
+    strStatsFromCombies = strStatsFromCombies + "[ " + COMBINATIONS_OF_PLAYER[i].toString() + " ] - WINS: " + statsFromCombi[i].wins + " / LOSES: " + statsFromCombi[i].loses + " / RATE: " + (statsFromCombi[i].wins / (statsFromCombi[i].loses + statsFromCombi[i].wins) * 100).toFixed(2) + "%\n";
   }
   strStatsFromCombies = strStatsFromCombies + "\n[ 최다 승리 조합 ]\n"
-  for(let i = 0; i < MOST_NUM; i++ ) {
-    strStatsFromCombies = strStatsFromCombies +"[ "+COMBINATIONS_OF_PLAYER[pointCombi.mostWinCombi[i]].toString()+" ] - WINS: "+statsFromCombi[pointCombi.mostWinCombi[i]].wins+"("+new Number(statsFromCombi[pointCombi.mostWinCombi[i]].wins+statsFromCombi[pointCombi.mostWinCombi[i]].loses)+"전)\n";
+  for (let i = 0; i < MOST_NUM; i++) {
+    strStatsFromCombies = strStatsFromCombies + "[ " + COMBINATIONS_OF_PLAYER[pointCombi.mostWinCombi[i]].toString() + " ] - WINS: " + statsFromCombi[pointCombi.mostWinCombi[i]].wins + "(" + new Number(statsFromCombi[pointCombi.mostWinCombi[i]].wins + statsFromCombi[pointCombi.mostWinCombi[i]].loses) + "전)\n";
   }
   strStatsFromCombies = strStatsFromCombies + "\n[ 최고 승률 조합 ]\n"
-  for(let i = 0; i < MOST_NUM; i++ ) {
-    strStatsFromCombies = strStatsFromCombies +"[ "+COMBINATIONS_OF_PLAYER[pointCombi.mostWinRateCombi[i]].toString()+" ] - WIN_RATES: "+(statsFromCombi[pointCombi.mostWinRateCombi[i]].wins/(statsFromCombi[pointCombi.mostWinRateCombi[i]].wins+statsFromCombi[pointCombi.mostWinRateCombi[i]].loses)*100).toFixed(2)+"%("+new Number(statsFromCombi[pointCombi.mostWinRateCombi[i]].wins+statsFromCombi[pointCombi.mostWinRateCombi[i]].loses)+"전)\n";
+  for (let i = 0; i < MOST_NUM; i++) {
+    strStatsFromCombies = strStatsFromCombies + "[ " + COMBINATIONS_OF_PLAYER[pointCombi.mostWinRateCombi[i]].toString() + " ] - WIN_RATES: " + (statsFromCombi[pointCombi.mostWinRateCombi[i]].wins / (statsFromCombi[pointCombi.mostWinRateCombi[i]].wins + statsFromCombi[pointCombi.mostWinRateCombi[i]].loses) * 100).toFixed(2) + "%(" + new Number(statsFromCombi[pointCombi.mostWinRateCombi[i]].wins + statsFromCombi[pointCombi.mostWinRateCombi[i]].loses) + "전)\n";
   }
   strStatsFromCombies = strStatsFromCombies + "\n[ 최다 패배 조합 ]\n"
-  for(let i = 0; i < MOST_NUM; i++ ) {
-    strStatsFromCombies = strStatsFromCombies +"[ "+COMBINATIONS_OF_PLAYER[pointCombi.mostLoseCombi[i]].toString()+" ] - LOSES: "+statsFromCombi[pointCombi.mostLoseCombi[i]].loses+"("+new Number(statsFromCombi[pointCombi.mostLoseCombi[i]].wins+statsFromCombi[pointCombi.mostLoseCombi[i]].loses)+"전)\n";
+  for (let i = 0; i < MOST_NUM; i++) {
+    strStatsFromCombies = strStatsFromCombies + "[ " + COMBINATIONS_OF_PLAYER[pointCombi.mostLoseCombi[i]].toString() + " ] - LOSES: " + statsFromCombi[pointCombi.mostLoseCombi[i]].loses + "(" + new Number(statsFromCombi[pointCombi.mostLoseCombi[i]].wins + statsFromCombi[pointCombi.mostLoseCombi[i]].loses) + "전)\n";
   }
   strStatsFromCombies = strStatsFromCombies + "\n[ 최저 승률 조합 ]\n"
-  for(let i = 0; i < MOST_NUM; i++ ) {
-    strStatsFromCombies = strStatsFromCombies +"[ "+COMBINATIONS_OF_PLAYER[pointCombi.mostLoseRateCombi[i]].toString()+" ] - WIN_RATES: "+(statsFromCombi[pointCombi.mostLoseRateCombi[i]].wins/(statsFromCombi[pointCombi.mostLoseRateCombi[i]].wins+statsFromCombi[pointCombi.mostLoseRateCombi[i]].loses)*100).toFixed(2)+"%("+new Number(statsFromCombi[pointCombi.mostLoseRateCombi[i]].wins+statsFromCombi[pointCombi.mostLoseRateCombi[i]].loses)+"전)\n";
+  for (let i = 0; i < MOST_NUM; i++) {
+    strStatsFromCombies = strStatsFromCombies + "[ " + COMBINATIONS_OF_PLAYER[pointCombi.mostLoseRateCombi[i]].toString() + " ] - WIN_RATES: " + (statsFromCombi[pointCombi.mostLoseRateCombi[i]].wins / (statsFromCombi[pointCombi.mostLoseRateCombi[i]].wins + statsFromCombi[pointCombi.mostLoseRateCombi[i]].loses) * 100).toFixed(2) + "%(" + new Number(statsFromCombi[pointCombi.mostLoseRateCombi[i]].wins + statsFromCombi[pointCombi.mostLoseRateCombi[i]].loses) + "전)\n";
   }
-  
+
   console.log(strStatsFromCombies);
 
-  for(let i = 0; i < PLAYER_NUM; i++) {
+  for (let i = 0; i < PLAYER_NUM; i++) {
     let p = players[PLAYER_INDEX[i]];
-    console.log(" [ "+PLAYER_INDEX[i]+" ] ");
-    console.log(" | 참석: "+p.dayTotal+" | 경기: "+p.matchTotal+" | MMR: "+p.curElo+" |\n | 첫판 승률: "+(p.firstWin / p.dayTotal*100).toFixed(2) + "% | 막판 승률: "+(p.lastWin / p.dayTotal*100).toFixed(2)+"% | \n | 최다 연승: "+p.conWin+" | 최다 연패: "+p.conLose+" | \n");
+    console.log(" [ " + PLAYER_INDEX[i] + " ] ");
+    console.log(" | 참석: " + p.dayTotal + " | 경기: " + p.matchTotal + " | MMR: " + p.curElo + " |\n | 첫판 승률: " + (p.firstWin / p.dayTotal * 100).toFixed(2) + "% | 막판 승률: " + (p.lastWin / p.dayTotal * 100).toFixed(2) + "% | \n | 최다 연승: " + p.conWin + " | 최다 연패: " + p.conLose + " | \n");
     console.log(" [ 매칭 인원 별 승률 ]");
-    console.log(" | 3:3  "+p.threeToThreeTotal+"전 "+p.threeToThreeWin+"승 "+(p.threeToThreeWin / p.threeToThreeTotal*100).toFixed(2) + "% | \n | 3:4  "+p.threeToFourTotal+"전 "+p.threeToFourWin+"승 "+(p.threeToFourWin / p.threeToFourTotal*100).toFixed(2) + "% | \n | 4:3  "+p.fourToThreeTotal+"전 "+p.fourToThreeWin+"승 "+(p.fourToThreeWin / p.fourToThreeTotal*100).toFixed(2) + "% | \n | 4:4  "+p.fourToFourTotal+"전 "+p.fourToFourWin+"승 "+(p.fourToFourWin / p.fourToFourTotal*100).toFixed(2)+"% | \n");
+    console.log(" | 3:3  " + p.threeToThreeTotal + "전 " + p.threeToThreeWin + "승 " + (p.threeToThreeWin / p.threeToThreeTotal * 100).toFixed(2) + "% | \n | 3:4  " + p.threeToFourTotal + "전 " + p.threeToFourWin + "승 " + (p.threeToFourWin / p.threeToFourTotal * 100).toFixed(2) + "% | \n | 4:3  " + p.fourToThreeTotal + "전 " + p.fourToThreeWin + "승 " + (p.fourToThreeWin / p.fourToThreeTotal * 100).toFixed(2) + "% | \n | 4:4  " + p.fourToFourTotal + "전 " + p.fourToFourWin + "승 " + (p.fourToFourWin / p.fourToFourTotal * 100).toFixed(2) + "% | \n");
     console.log(" [ 아군 매칭 시 승률 ]");
     let sameStr = "";
-    for(let j = 0; j < PLAYER_NUM; j++) {
-      if(i === j) continue;
-      sameStr += " | "+PLAYER_INDEX[j] + " " + p.sameSideTotal[j] +"전 " + p.sameSideWin[j] + "승 " + (p.sameSideWin[j] / p.sameSideTotal[j] * 100).toFixed(2) + "% | \n";
+    for (let j = 0; j < PLAYER_NUM; j++) {
+      if (i === j) continue;
+      sameStr += " | " + PLAYER_INDEX[j] + " " + p.sameSideTotal[j] + "전 " + p.sameSideWin[j] + "승 " + (p.sameSideWin[j] / p.sameSideTotal[j] * 100).toFixed(2) + "% | \n";
     }
     console.log(sameStr);
     console.log(" [ 적군 매칭 시 승률 ]");
     let otherStr = "";
-    for(let j = 0; j < PLAYER_NUM; j++) {
-      if(i === j) continue;
-      otherStr += " | "+PLAYER_INDEX[j] + " " + p.otherSideTotal[j] +"전 " + p.otherSideWin[j] + "승 " + (p.otherSideWin[j] / p.otherSideTotal[j]*100).toFixed(2) + "% | \n";   
+    for (let j = 0; j < PLAYER_NUM; j++) {
+      if (i === j) continue;
+      otherStr += " | " + PLAYER_INDEX[j] + " " + p.otherSideTotal[j] + "전 " + p.otherSideWin[j] + "승 " + (p.otherSideWin[j] / p.otherSideTotal[j] * 100).toFixed(2) + "% | \n";
     }
     console.log(otherStr);
     console.log("\n\n");
@@ -766,8 +525,8 @@ console.log("\n\n\n");
 
 
 // ///////////////////
-// 같은 편일 때 승률 
-// 상대 편일 때 승률 
+// 같은 편일 때 승률
+// 상대 편일 때 승률
 // 3:3 승률
 // 3:4 승률
 // 4:3 승률
