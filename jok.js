@@ -8,7 +8,7 @@ fs.readFile('./simpleJok.txt', 'utf8', function(err, totalRecord){
   let recordObject = {};
 
   const PLAYER_NUM=7;
-  let playerIndex = ["커두", "푸름", "바키", "서재", "강산", "영쿠", "빵길", "이다", "오범", "준형", "손민", "민우", "홍", "한", "고", "진호", "승훈", "박준", "태"];   
+  let playerIndex = ["커두", "푸름", "바키", "서재", "강산", "영쿠", "빵길", "광해", "이다", "오범", "준형", "손민", "민우", "홍", "한", "고", "진호", "승훈", "박준", "태"];   
   let player = { };
   for(let i = 0; i < playerIndex.length; i++) {
     player[playerIndex[i]] = {
